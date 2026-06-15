@@ -1,0 +1,313 @@
+# Betrimex Fabric Demo — Data Dictionary
+
+**Version:** 1.0
+**Source layer:** Bronze (raw synthetic CSVs in `01_data/raw/`)
+**Owner:** Therese Sario, Microsoft Philippines
+**Customer:** Betrimex (Ben Tre Trading & Import-Export JSC) — Vietnamese coconut processor, brand Cocoxim
+
+---
+
+## Entity Relationship Overview
+
+```
+       farmers (1) ──< lots (M) ──< lot_consumption (M) >── (1) production_runs
+                                                                  │
+                                                                  ├── (M) quality_tests
+                                                                  │
+                                                                  └── (M) sales_orders
+```
+
+**Key relationships**
+
+- 1 farmer → many lots
+- Many lots → many production runs (via `lot_consumption` bridge)
+- 1 production run → many quality tests
+- 1 production run → many sales orders
+
+The `lot_consumption` bridge enables **lot-level traceability** — the ability to trace any Cocoxim bottle back to the specific smallholder farmer(s) whose coconuts went into it. Critical for organic certification audits (EU Organic, USDA Organic).
+
+---
+
+## Table Index
+
+| # | Table | Granularity | Rows | Type |
+|---|---|---|---|---|
+| 1 | `farmers.csv` | One row per farmer | ~30,000 | Dimension |
+| 2 | `lots.csv` | One row per coconut delivery | ~500,000 | Fact |
+| 3 | `production_runs.csv` | One row per processing batch | ~20,000 | Fact |
+| 4 | `lot_consumption.csv` | One row per lot used in a run | ~2,000,000 | Bridge |
+| 5 | `quality_tests.csv` | One row per QA test | ~120,000 | Fact |
+| 6 | `sales_orders.csv` | One row per sales order line | ~80,000 | Fact |
+
+---
+
+## 1. `farmers.csv` — Farmer Master
+
+**Description:** Master table of smallholder coconut farmers in Vietnam's Mekong Delta who supply Betrimex.
+
+**Grain:** One row per farmer.
+**Primary key:** `farmer_id`
+
+| Column | Type | Nullable | Description | Example | Notes |
+|---|---|---|---|---|---|
+| `farmer_id` | Integer | No | Unique farmer identifier | `1`, `27483` | Sequential, 1–30,000. Used as FK in `lots` and `lot_consumption`. |
+| `name` | String | No | Farmer's full name (Vietnamese) | `Nguyễn Văn Hùng` | Generated via Faker `vi_VN` locale. Diacritics preserved. |
+| `district` | String | No | Mekong Delta province where the farmer operates | `Ben Tre` | One of: `Ben Tre`, `Tra Vinh`, `Tien Giang`, `Vinh Long`. Drives which collection point they deliver to. |
+| `organic_certification` | String | No | Whether the farmer holds an organic certification | `Certified Organic`, `Non-Organic` | Drives lot quality and eligibility for the organic plant. |
+
+**Business notes**
+
+- ~25–30% of farmers are organic-certified (EU + USDA scope).
+- District distribution favors Ben Tre (the historical coconut hub) over the smaller provinces.
+- Use this table as `dim_farmer` in the Gold layer.
+
+---
+
+## 2. `lots.csv` — Coconut Lot Deliveries
+
+**Description:** Every batch of coconuts a farmer delivers to a collection point. The foundational supply data.
+
+**Grain:** One row per delivery.
+**Primary key:** `lot_id`
+**Foreign keys:** `farmer_id` → `farmers.farmer_id`
+
+| Column | Type | Nullable | Description | Example | Notes |
+|---|---|---|---|---|---|
+| `lot_id` | String | No | Unique lot identifier | `LOT-0000001` | Zero-padded sequence. Used as FK in `lot_consumption`. |
+| `farmer_id` | Integer | No | Reference to delivering farmer | `12345` | FK to `farmers`. |
+| `intake_date` | Date (YYYY-MM-DD) | No | Date the lot was received at the collection point | `2025-08-14` | Spans ~2 years of history. Use for time-series analysis. |
+| `collection_point` | String | No | The Betrimex hub where the farmer delivered | `Mo Cay Nam Hub` | Always within the farmer's district. 17 distinct hubs across 4 provinces. |
+| `district` | String | No | Province the lot came from | `Ben Tre` | Denormalized from farmer for query performance. |
+| `weight_kg` | Float | No | Net weight of the coconuts in this lot | `213.5` | Range ~50–500 kg, mode ~180 kg (typical smallholder delivery size). |
+| `brix` | Float | No | Sugar content of the coconut water in this lot | `6.21` | Range 3.5–8.5 °Bx. Mean ~6.0. Critical quality driver — low brix → low yield. |
+| `grade` | String | No | Quality grade assigned at intake | `A`, `B`, `C` | Distribution ~60% A / 30% B / 10% C overall. Organic farms skew higher. |
+| `is_organic` | Boolean | No | Whether this lot came from an organic-certified farmer | `True`, `False` | Denormalized from farmer for fast filtering. |
+
+**Business notes**
+
+- `brix` and `grade` are the two main quality drivers — Data Agent uses these to explain yield variance.
+- `intake_date` is the single most important date for time-series queries.
+- The combination of (`farmer_id`, `intake_date`) is effectively unique for natural-key joins.
+
+---
+
+## 3. `production_runs.csv` — Processing Batches
+
+**Description:** Every batch of Cocoxim product processed on a specific plant line. Links input (lots) to output (bottles/packages).
+
+**Grain:** One row per production run.
+**Primary key:** `run_id`
+
+| Column | Type | Nullable | Description | Example | Notes |
+|---|---|---|---|---|---|
+| `run_id` | String | No | Unique run identifier | `RUN-000123` | Zero-padded sequence. Used as FK in `quality_tests`, `sales_orders`, `lot_consumption`. |
+| `plant` | String | No | Manufacturing plant where the run occurred | `Ben Tre Main Plant` | One of 3 plants: Main, Organic, New Facility. |
+| `line` | String | No | Specific production line within the plant | `Line 1`, `Line 2` | Each plant has 2–4 lines. |
+| `product` | String | No | Cocoxim SKU produced in this run | `Cocoxim Coconut Water Original 330ml` | Real-ish SKU naming. ~15 distinct products. |
+| `shift` | String | No | Production shift | `Morning`, `Afternoon`, `Night` | 8-hour shifts. |
+| `start_datetime` | Datetime | No | When the run started | `2025-08-14 06:15:00` | Local time. |
+| `end_datetime` | Datetime | No | When the run completed | `2025-08-14 14:42:00` | `start_datetime + duration_hours`. |
+| `duration_hours` | Float | No | Run duration | `8.45` | Typical 4–12 hours. |
+| `input_weight_kg` | Float | No | Total raw coconut input consumed | `28450.0` | Sum of `weight_kg` across consumed lots. |
+| `expected_yield` | Float | No | Theoretical output given input and product type | `11949.0` | Liters for water/milk, kg for desiccated/oil. |
+| `actual_yield` | Float | No | Real output measured at end of run | `10260.3` | Always ≤ `expected_yield`. |
+| `yield_pct` | Float | No | actual / expected × 100 | `85.86` | Range ~55–99%. Mean ~85%. The headline KPI. |
+| `avg_brix` | Float | No | Weighted average brix of consumed lots | `6.18` | Quality input signal. |
+| `grade_a_pct` | Float | No | Percentage of consumed lots that were Grade A | `62.40` | Quality input signal. |
+| `downtime_minutes` | Integer | No | Total downtime during the run | `35` | Most runs <30 min; 5% have major events (60–240 min). |
+| `is_organic_run` | Boolean | No | Whether this run produced an organic SKU | `True`, `False` | Driven by which plant + product. |
+| `num_lots_consumed` | Integer | No | Number of distinct lots used in this run | `127` | Range 50–200. |
+
+**Business notes**
+
+- `yield_pct` is the single most important manufacturing KPI — the Data Agent should treat it as the primary measure.
+- Low `avg_brix` or low `grade_a_pct` are the two most common drivers when `yield_pct` underperforms.
+- Use `is_organic_run` to filter for organic-traceability questions.
+- Use this table as `fact_production_run` in the Gold layer.
+
+---
+
+## 4. `lot_consumption.csv` — Lot-to-Run Bridge
+
+**Description:** Many-to-many bridge mapping which lots were consumed in which production run. The traceability backbone.
+
+**Grain:** One row per (run, lot) pair.
+**Composite key:** (`run_id`, `lot_id`)
+**Foreign keys:** `run_id` → `production_runs.run_id`; `lot_id` → `lots.lot_id`; `farmer_id` → `farmers.farmer_id`
+
+| Column | Type | Nullable | Description | Example | Notes |
+|---|---|---|---|---|---|
+| `run_id` | String | No | The production run that consumed the lot | `RUN-000123` | FK to `production_runs`. |
+| `lot_id` | String | No | The lot that was consumed | `LOT-0000457` | FK to `lots`. |
+| `farmer_id` | Integer | No | Farmer who supplied the lot | `12345` | Denormalized for fast traceability joins. |
+| `weight_consumed` | Float | No | Weight of the lot used in this run (kg) | `213.5` | Currently equal to the lot's full weight (simplification — could be partial). |
+
+**Business notes**
+
+- This is the **critical table for organic certification audits**: trace any sales order → run → lots → farmers in 3 hops.
+- ~2 million rows — biggest table. Strongly consider Parquet over CSV.
+- Use this table as `bridge_lot_run` in the Gold layer.
+
+---
+
+## 5. `quality_tests.csv` — QA Test Results
+
+**Description:** Quality assurance test results performed during and after each production run.
+
+**Grain:** One row per test execution.
+**Primary key:** `test_id`
+**Foreign key:** `run_id` → `production_runs.run_id`
+
+| Column | Type | Nullable | Description | Example | Notes |
+|---|---|---|---|---|---|
+| `test_id` | String | No | Unique test execution identifier | `QT-00000001` | Zero-padded sequence. |
+| `run_id` | String | No | Production run the test was performed on | `RUN-000123` | FK to `production_runs`. |
+| `test_name` | String | No | Specific QA test performed | `Brix`, `pH`, `Total Plate Count` | 10 distinct tests. |
+| `category` | String | No | Test category | `Chemical`, `Microbiological`, `Physical` | Used for category-level pass/fail rollups. |
+| `value` | Float | No | Measured test value | `6.18`, `45.2` | Unit varies by test (see `unit`). |
+| `target` | Float | No | Target spec for the test | `6.0` | Same unit as `value`. |
+| `tolerance` | Float | No | Acceptable +/- variance from target | `1.0` | Inside [target−tolerance, target+tolerance] = Pass. |
+| `unit` | String | No | Measurement unit | `°Bx`, `pH`, `CFU/mL`, `mg/L`, `mL`, `cP`, `L*` | Display unit for the value. |
+| `pass_fail` | String | No | Whether the test passed spec | `Pass`, `Fail` | ~90% Pass overall. |
+| `test_datetime` | Datetime | No | When the test was performed | `2025-08-14 09:32:00` | During or shortly after the run. |
+
+### Test catalog
+
+| test_name | category | Target | Unit | Notes |
+|---|---|---|---|---|
+| `Brix` | Chemical | 6.0 ±1.0 | °Bx | Sugar / sweetness |
+| `pH` | Chemical | 5.2 ±0.4 | pH | Acidity |
+| `Sodium` | Chemical | 105 ±25 | mg/L | Mineral content |
+| `Potassium` | Chemical | 250 ±50 | mg/L | Mineral content |
+| `Total Plate Count` | Microbiological | ≤100 ±200 | CFU/mL | Bacterial load |
+| `Yeast & Mold` | Microbiological | ≤10 ±20 | CFU/mL | Fungal load |
+| `Coliform` | Microbiological | 0 ±1 | CFU/mL | Contamination indicator |
+| `Color L*` | Physical | 92 ±4 | L* | CIE Lab lightness |
+| `Viscosity` | Physical | 1.2 ±0.3 | cP | Thickness |
+| `Fill Volume` | Physical | 330 ±5 | mL | Package fill accuracy |
+
+**Business notes**
+
+- Failure rates correlate with low input quality (low brix, low Grade A %).
+- Microbiological failures are the most serious from a compliance standpoint.
+
+---
+
+## 6. `sales_orders.csv` — Sales Orders
+
+**Description:** Domestic and export sales orders linked back to the production run that fulfilled them.
+
+**Grain:** One row per order line.
+**Primary key:** `order_id`
+**Foreign key:** `run_id` → `production_runs.run_id`
+
+| Column | Type | Nullable | Description | Example | Notes |
+|---|---|---|---|---|---|
+| `order_id` | String | No | Unique sales order identifier | `SO-0000001` | Zero-padded sequence. |
+| `order_date` | Date | No | When the order was placed | `2025-09-12` | Run date + 1–60 day shipping lag. |
+| `customer` | String | No | Buying customer | `WinMart`, `Whole Foods Market` | Domestic uses real VN retailer names; export uses Faker company names. |
+| `country` | String | No | Destination country | `Vietnam`, `Germany`, `United States` | 1 domestic + 15 export countries. |
+| `region` | String | No | Geographic region | `Domestic`, `Europe`, `North America`, `Asia-Pacific`, `Middle East` | Roll-up for region-level analysis. |
+| `channel` | String | No | Sales channel | `Modern Trade`, `HORECA`, `Wholesale` | Domestic and export use different channel sets. |
+| `is_domestic` | Boolean | No | Domestic Vietnam vs export | `True`, `False` | ~55% domestic / 45% export. |
+| `is_organic` | Boolean | No | Whether the SKU sold is organic | `True`, `False` | Higher share in export. |
+| `run_id` | String | No | Production run that fulfilled this order | `RUN-000123` | FK to `production_runs`. Enables full traceability. |
+| `product` | String | No | Cocoxim SKU sold | `Cocoxim Organic Coconut Water 330ml` | Same naming as `production_runs.product`. |
+| `quantity_units` | Integer | No | Units in the order | `45000` | Wholesale orders much larger than retail. |
+| `unit_price_usd` | Float | No | Price per unit in USD (FOB) | `0.385` | After ±8% market variance. |
+| `revenue_usd` | Float | No | quantity × unit_price_usd | `17325.00` | Normalized currency for global comparisons. |
+| `revenue_local` | Float | No | Revenue in the destination's currency | `17325.00` (USD) or `424,462,500` (VND) | Use `currency` to interpret. |
+| `currency` | String | No | ISO currency code of `revenue_local` | `USD`, `EUR`, `VND` | VND for domestic, EUR for Eurozone, USD elsewhere. |
+| `margin_pct` | Float | No | Margin percentage | `27.4` | Organic averages 28%, conventional 20%. |
+| `margin_usd` | Float | No | Absolute margin contribution | `4747.05` | revenue_usd × margin_pct / 100. |
+| `on_time_delivery` | Boolean | No | Whether the order shipped on time | `True`, `False` | ~92% on-time overall, 88% for organic (extra cert checks). |
+
+**Business notes**
+
+- The `run_id` foreign key is what makes lot-level traceability possible end-to-end: from a single bottle in a German supermarket back to the smallholder farmer in Mo Cay Nam.
+- Use `revenue_usd` for cross-country comparisons; `revenue_local` for in-country reporting.
+- `margin_pct` is a key strategic KPI — used to justify the organic premium.
+
+---
+
+## Suggested Semantic Model Mapping
+
+When you import these into Fabric's Gold layer, the conventional dimensional model would be:
+
+| Star Schema Role | Source Table |
+|---|---|
+| `dim_farmer` | `farmers.csv` |
+| `dim_product` | Derived: distinct (`product`, `is_organic`) from `production_runs` |
+| `dim_plant` | Derived: distinct (`plant`, `line`) from `production_runs` |
+| `dim_customer` | Derived: distinct (`customer`, `country`, `region`, `channel`) from `sales_orders` |
+| `dim_date` | Generated date dimension covering ~2.5 years |
+| `dim_test_type` | Derived: distinct test catalog from `quality_tests` |
+| `fact_intake` | `lots.csv` |
+| `fact_production_run` | `production_runs.csv` |
+| `fact_quality_test` | `quality_tests.csv` |
+| `fact_sales_order` | `sales_orders.csv` |
+| `bridge_lot_run` | `lot_consumption.csv` |
+
+---
+
+## Suggested Certified Measures (DAX)
+
+| Measure | Formula | Format |
+|---|---|---|
+| **Yield %** | `SUM(production_runs[actual_yield]) / SUM(production_runs[expected_yield])` | Percentage |
+| **Grade A %** | `COUNTROWS(FILTER(lots, lots[grade]="A")) / COUNTROWS(lots)` | Percentage |
+| **Average Brix** | `AVERAGE(lots[brix])` | Decimal (2) |
+| **Yield Loss (L)** | `SUM(production_runs[expected_yield]) - SUM(production_runs[actual_yield])` | Decimal |
+| **Total Revenue USD** | `SUM(sales_orders[revenue_usd])` | Currency |
+| **Total Margin USD** | `SUM(sales_orders[margin_usd])` | Currency |
+| **Margin %** | `[Total Margin USD] / [Total Revenue USD]` | Percentage |
+| **On-Time Delivery %** | `AVERAGE(sales_orders[on_time_delivery] = TRUE)` | Percentage |
+| **QA Pass Rate** | `COUNTROWS(FILTER(quality_tests, quality_tests[pass_fail]="Pass")) / COUNTROWS(quality_tests)` | Percentage |
+| **Organic Revenue %** | `[Organic Revenue] / [Total Revenue USD]` | Percentage |
+| **Lots per Run (avg)** | `AVERAGE(production_runs[num_lots_consumed])` | Whole number |
+
+---
+
+## Bilingual Synonyms for the Data Agent
+
+| English | Vietnamese | Maps to |
+|---|---|---|
+| Yield | năng suất | `Yield %` measure |
+| Farmer | nông dân | `farmers` table |
+| Lot | lô hàng | `lots` table |
+| Brix | độ ngọt | `lots.brix` column |
+| Grade | hạng | `lots.grade` column |
+| Plant | nhà máy | `production_runs.plant` |
+| Line | dây chuyền | `production_runs.line` |
+| Organic | hữu cơ | `is_organic` flags |
+| District | huyện / quận | `farmers.district` |
+| Province | tỉnh | `farmers.district` |
+| Revenue | doanh thu | `revenue_usd` / `revenue_local` |
+| Margin | biên lợi nhuận | `margin_pct` / `margin_usd` |
+| Customer | khách hàng | `sales_orders.customer` |
+| Order | đơn hàng | `sales_orders` table |
+| Plant supervisor | quản đốc nhà máy | role context |
+| Production run | mẻ sản xuất | `production_runs` table |
+| Quality test | kiểm định chất lượng | `quality_tests` table |
+| Yield loss | hao hụt | yield gap measure |
+| On-time delivery | giao hàng đúng hạn | `on_time_delivery` |
+| Sustainability | bền vững | sustainability dimensions |
+
+---
+
+## Where to Place This File in Your GitHub Repo
+
+```
+betrimex-fabric-demo/
+└── docs/
+    └── data-dictionary.md   ← This file
+```
+
+Commit it alongside your generator scripts. It serves three purposes:
+1. **Onboarding** — anyone cloning the repo understands the data instantly
+2. **Ontology source** — copy/paste columns and descriptions into the Fabric semantic model
+3. **Agent grounding** — paste the synonyms table into your Data Agent's system prompt
+
+---
+
+*Prepared by Therese Sario, Digital Solution Engineer, Microsoft Philippines.*
