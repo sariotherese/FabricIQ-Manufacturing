@@ -1,0 +1,119 @@
+table_name,column_name,description
+farmer_dim,,"The master list of the smallholder coconut farmers who supply Betrimex across the Mekong Delta. It anchors supplier analytics and is the endpoint of every traceability query — answering which farms a product came from and how much of supply is organic-certified."
+farmer_dim,farmer_key,Stable identifier used to link a farmer to their deliveries and to finished product.
+farmer_dim,farmer_id,"The supplier's ID in source systems, used when reconciling with field/procurement records."
+farmer_dim,name,"Identifies the individual grower for audits, payments, and farmer engagement."
+farmer_dim,district,"Shows where supply originates, supporting regional sourcing strategy and risk concentration."
+farmer_dim,province,Province-level grouping for geographic supply reporting.
+farmer_dim,organic_certification,Confirms a farm's certification status — the basis for organic sourcing and premium pricing.
+farmer_dim,is_organic,Fast filter to size organic vs. conventional supply for EU/USDA audit scope.
+product_dim,,"The catalog of Cocoxim finished-goods SKUs. It lets the business slice production and sales by product and by product family, and distinguish organic from conventional lines."
+product_dim,product_key,Stable identifier linking a SKU to its production runs and sales orders.
+product_dim,product,The branded product as customers order it — the level at which pricing and demand are managed.
+product_dim,product_family,Rolls SKUs into categories for portfolio-level revenue and yield comparison.
+product_dim,is_organic,Separates the premium organic range from conventional for margin and compliance analysis.
+plant_dim,,"The manufacturing footprint — each processing plant and the lines within it. It enables plant- and line-level performance benchmarking (yield, throughput, downtime) and separates organic-certified facilities from conventional ones."
+plant_dim,plant_key,Stable identifier linking a specific line to its production runs.
+plant_dim,plant,The site responsible for output — the unit for capacity and plant-vs-plant comparison.
+plant_dim,line,"The specific line, used to pinpoint where yield or quality issues arise."
+plant_dim,plant_type,"Flags organic-dedicated facilities, which matters for certification segregation."
+customer_dim,,"Who Betrimex sells to — domestic distributors and international export buyers. It underpins market analysis: revenue by country, region, and channel, and the domestic-vs-export split that drives commercial strategy."
+customer_dim,customer_key,Stable identifier linking a customer to their orders.
+customer_dim,customer,The account being sold to — the level for relationship and account management.
+customer_dim,country,"Destination market, key for export reporting and trade/tariff analysis."
+customer_dim,region,Groups markets for territory-level sales performance.
+customer_dim,channel,"Route to market, used to compare domestic, export, and retail economics."
+customer_dim,is_domestic,The headline split between home-market and export revenue.
+date_dim,,"The shared calendar that ties intake, production, quality, and sales to a common time axis. It powers all trend, seasonality, and period-over-period reporting (harvest seasons, monthly yield, quarterly revenue)."
+date_dim,date_key,"The join key every fact uses to report ""by date""."
+date_dim,date,The actual day an event occurred.
+date_dim,year,"Year-over-year comparison of supply, output, and sales."
+date_dim,quarter,Quarterly business reviews and targets.
+date_dim,month,Monthly trending and ordering of periods.
+date_dim,month_name,Readable month labels for reports and dashboards.
+date_dim,day,Daily granularity for operational analysis.
+date_dim,day_of_week,Reveals weekday vs. weekend operating patterns.
+date_dim,week_of_year,Weekly operational and supply cadence.
+date_dim,is_weekend,"Separates weekend operations, which affect shift staffing and throughput."
+test_type_dim,,"The catalog of quality-assurance checks Betrimex runs and the specifications each must meet. It defines what in-spec means and lets quality results be grouped by test category for food-safety and compliance reporting."
+test_type_dim,test_type_key,Stable identifier linking a test definition to its results.
+test_type_dim,test_name,"The specific check performed, e.g. sweetness or bacterial load."
+test_type_dim,category,Groups tests for category-level pass/fail rollups (esp. food safety).
+test_type_dim,target,The ideal result the product should hit.
+test_type_dim,tolerance,Defines the pass/fail window around target.
+test_type_dim,unit,Makes results interpretable and comparable to spec.
+fact_intake_dim,,"Every batch of coconuts received from a farmer at a collection point — the raw-material supply that feeds production. It measures how much is coming in, at what quality, and from where, and is the starting point for supply traceability."
+fact_intake_dim,lot_id,"The traceable unit of incoming supply, referenced all the way to finished product."
+fact_intake_dim,farmer_key,Ties each delivery to the farm that supplied it.
+fact_intake_dim,date_key,Enables intake volume and quality trends over time (harvest seasons).
+fact_intake_dim,intake_date,When supply arrived — used for freshness and seasonality analysis.
+fact_intake_dim,collection_point,Identifies the receiving hub for logistics and regional intake reporting.
+fact_intake_dim,district,Geographic origin of supply for sourcing and risk analysis.
+fact_intake_dim,weight_kg,The core supply-volume measure (tonnes of coconut received).
+fact_intake_dim,brix,Key quality measure that drives downstream processing yield.
+fact_intake_dim,grade,Intake quality classification used for pricing and sorting.
+fact_intake_dim,is_organic,Identifies certified-organic supply for segregation and audits.
+fact_intake_dim,quality_flag,Quick at-a-glance status to spot problem lots (low sweetness/grade).
+fact_production_run_dim,,"Each batch processed on a plant line — the heart of manufacturing performance. It links raw input to finished output and carries the headline efficiency KPI (yield %), along with the quality and downtime signals that explain why yield moves."
+fact_production_run_dim,run_id,"The unit of production, linking inputs (lots) to outputs (product) and tests."
+fact_production_run_dim,date_key,Enables production and yield trending over time.
+fact_production_run_dim,product_key,Ties output to the SKU being made.
+fact_production_run_dim,plant_key,Attributes performance to a specific plant and line.
+fact_production_run_dim,plant,Where the batch ran — for plant-level benchmarking.
+fact_production_run_dim,line,Pinpoints the line for performance and troubleshooting.
+fact_production_run_dim,product,What was made in the run.
+fact_production_run_dim,shift,Compares performance across shifts (staffing/operating patterns).
+fact_production_run_dim,start_datetime,"Marks when processing began, for scheduling and duration analysis."
+fact_production_run_dim,end_datetime,"Marks completion, for throughput and turnaround analysis."
+fact_production_run_dim,duration_hours,How long the batch took — a throughput/efficiency measure.
+fact_production_run_dim,input_weight_kg,Raw material consumed — the denominator behind conversion efficiency.
+fact_production_run_dim,expected_yield,The target output given input and recipe — the yield benchmark.
+fact_production_run_dim,actual_yield,What was actually produced — the basis for efficiency and loss.
+fact_production_run_dim,yield_pct,The headline manufacturing KPI — how efficiently coconuts convert to product.
+fact_production_run_dim,yield_loss,Quantifies lost output — the gap to target in absolute terms.
+fact_production_run_dim,yield_band,Buckets runs into performance tiers for quick exception spotting.
+fact_production_run_dim,avg_brix,Input-quality signal — a leading explanation for yield variance.
+fact_production_run_dim,grade_a_pct,Input-quality signal — higher Grade A typically lifts yield.
+fact_production_run_dim,downtime_minutes,Lost operating time — a key driver of throughput and OEE.
+fact_production_run_dim,is_organic_run,Flags organic production for certification and segregation.
+fact_production_run_dim,num_lots_consumed,Indicates supply blending and the breadth of traceability per run.
+fact_quality_test_dim,,"The food-safety and quality record — every lab/line test performed on a production run. It evidences that product met specification, supports pass/fail reporting, and is central to compliance and customer assurance."
+fact_quality_test_dim,test_id,"The unique record of a single quality check, for audit trails."
+fact_quality_test_dim,run_id,Ties each test to the batch it certifies.
+fact_quality_test_dim,test_type_key,Links the result to its spec definition and category.
+fact_quality_test_dim,date_key,Enables quality trend and pass-rate analysis over time.
+fact_quality_test_dim,test_name,"The check performed (e.g. sweetness, bacterial load)."
+fact_quality_test_dim,category,Groups results for category-level food-safety rollups.
+fact_quality_test_dim,value,The actual result — compared against spec to judge quality.
+fact_quality_test_dim,target,The benchmark the result is judged against.
+fact_quality_test_dim,tolerance,Defines the in-spec window for the result.
+fact_quality_test_dim,unit,Makes the value interpretable against spec.
+fact_quality_test_dim,pass_fail,The compliance outcome — the core quality KPI.
+fact_quality_test_dim,test_datetime,"Timing of the check, for in-process vs. final QA analysis."
+fact_sales_order_dim,,"The commercial outcome — what was sold, to whom, and at what value and margin. It is the revenue and profitability backbone, and via run_id it links every sale back to the batch and farms that produced it."
+fact_sales_order_dim,order_id,The unit of sale — the grain for revenue and fulfillment reporting.
+fact_sales_order_dim,date_key,Enables sales and revenue trending over time.
+fact_sales_order_dim,product_key,Attributes revenue to the SKU sold.
+fact_sales_order_dim,customer_key,Attributes revenue to the customer/market.
+fact_sales_order_dim,run_id,The link that makes a sold product traceable back to its source.
+fact_sales_order_dim,order_date,When the sale occurred — for revenue timing and seasonality.
+fact_sales_order_dim,customer,The buying account.
+fact_sales_order_dim,country,Destination market for export reporting.
+fact_sales_order_dim,region,Territory grouping for sales performance.
+fact_sales_order_dim,channel,Route to market for channel economics.
+fact_sales_order_dim,is_domestic,The home-vs-export revenue split.
+fact_sales_order_dim,is_organic,Sizes the premium organic business.
+fact_sales_order_dim,product,The product on the order line.
+fact_sales_order_dim,quantity_units,Sales volume measure.
+fact_sales_order_dim,unit_price_usd,Pricing measure for price realization analysis.
+fact_sales_order_dim,revenue_usd,The primary revenue measure (reporting currency).
+fact_sales_order_dim,revenue_local,Revenue in the transaction currency for local reconciliation.
+fact_sales_order_dim,currency,Identifies the transaction currency.
+fact_sales_order_dim,margin_pct,Profitability rate — a core commercial KPI.
+fact_sales_order_dim,margin_usd,Absolute profit contribution of the order.
+fact_sales_order_dim,on_time_delivery,Service-level KPI for fulfillment reliability.
+bridge_lot_run_dim,,"The traceability backbone that records which farmer lots went into which production run. It resolves the many-to-many between supply and production and is what makes farm-to-product (and product-to-farm) tracing possible for certification audits."
+bridge_lot_run_dim,run_id,The production batch side of the supply-to-production link.
+bridge_lot_run_dim,lot_id,The incoming-supply side of the link — the lot consumed.
+bridge_lot_run_dim,farmer_key,Carries the source farm so traceability resolves in one hop.
+bridge_lot_run_dim,weight_consumed,How much of each lot fed the batch — supports mass-balance and contribution analysis.

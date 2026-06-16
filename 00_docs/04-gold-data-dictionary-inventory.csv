@@ -1,0 +1,30 @@
+table_name,column_name,description
+fact_inventory_snapshot_dim,,"The daily stock position of every Cocoxim SKU at every distribution center — the running balance of what was on hand, what came in from production, and what shipped out. It is the single source for stock visibility, days-of-supply, reorder-point alerting, and restock recommendations."
+fact_inventory_snapshot_dim,snapshot_date,Puts every balance on a daily time axis for trend and as-of reporting.
+fact_inventory_snapshot_dim,product,The item being stocked and replenished.
+fact_inventory_snapshot_dim,product_family,Rolls SKUs up for category-level stock and service reporting.
+fact_inventory_snapshot_dim,warehouse,Localizes stock and alerts to the site that must act.
+fact_inventory_snapshot_dim,region,Groups DCs for regional availability analysis.
+fact_inventory_snapshot_dim,opening_units,The carry-in balance before the day's flows.
+fact_inventory_snapshot_dim,receipts_units,Inbound supply from production + scheduled replenishment arrivals.
+fact_inventory_snapshot_dim,issues_units,Demand fulfilled — the draw-down on stock.
+fact_inventory_snapshot_dim,on_hand_units,The current stock level — the number the alert is judged against.
+fact_inventory_snapshot_dim,avg_daily_demand,The demand rate driving reorder point and days-of-supply.
+fact_inventory_snapshot_dim,lead_time_days,How long restock takes — sets how early to reorder.
+fact_inventory_snapshot_dim,safety_stock_units,Protects against stockouts during the lead time.
+fact_inventory_snapshot_dim,reorder_point_units,The threshold the alert fires at — the core rule.
+fact_inventory_snapshot_dim,on_order_units,Prevents duplicate ordering while a replenishment is inbound.
+fact_inventory_snapshot_dim,days_of_supply,The headline urgency metric managers watch.
+fact_inventory_snapshot_dim,stock_status,One-glance status for dashboards and triage.
+fact_inventory_snapshot_dim,restock_alert,The flag that drives the manager alert.
+fact_inventory_snapshot_dim,recommended_order_units,Tells the manager how much to order to reach the target level.
+inventory_alert_dim,,"The manager's action list — the latest snapshot filtered to only SKUs at or below their reorder point, sorted by urgency. This is what gets surfaced as the restock now alert and feeds the replenishment decision."
+inventory_alert_dim,snapshot_date,"Establishes the ""as of"" date of the alert inbox."
+inventory_alert_dim,warehouse,Directs the alert to the responsible site.
+inventory_alert_dim,product,Identifies exactly what to replenish.
+inventory_alert_dim,product_family,Lets managers prioritize by category.
+inventory_alert_dim,on_hand_units,Shows how little stock remains.
+inventory_alert_dim,reorder_point_units,Explains why the alert fired.
+inventory_alert_dim,days_of_supply,The urgency ranking for the alert.
+inventory_alert_dim,stock_status,Severity label (LOW / CRITICAL / OUT).
+inventory_alert_dim,recommended_order_units,The recommended action — how much to order.
