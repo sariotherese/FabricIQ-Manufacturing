@@ -1,0 +1,78 @@
+Betrimex Farmer Feedback and Observations by Lot
+Reference basis: Gold data dictionary and data source description (fact_intake-style fields: lot, farmer, district, intake_date, weight_kg, brix, grade, organic flag).
+Note: Remarks below are narrative observations aligned to synthetic lot records.
+
+1) Lot: LOT-0004427
+- Farmer ID: 23302
+- Farmer Name: Co Vi Tran
+- District: Tien Giang
+- Certification: Non-Organic
+- Intake Date: 2024-06-22
+- Collection Point: Cho Gao Hub
+- Weight (kg): 261.4
+- Brix: 6.97
+- Grade: B
+- Organic Lot: False
+- Positive Remark: "Harvest volume was stable and fruit size was mostly consistent across the lot."
+- Negative Remark: "Rain before pickup reduced quality consistency and lowered expected sweetness."
+- Operations Observation: Good delivered volume with mid-grade quality; monitor brix variability in the next cycles.
+
+2) Lot: LOT-0000795
+- Farmer ID: 2013
+- Farmer Name: Ong Hoang Vu
+- District: Tien Giang
+- Certification: Certified Organic
+- Intake Date: 2025-10-13
+- Collection Point: Cai Lay Hub
+- Weight (kg): 253.5
+- Brix: 6.22
+- Grade: A
+- Organic Lot: True
+- Positive Remark: "Harvest handling and transport timing were effective, resulting in Grade A quality."
+- Negative Remark: "Brix can still improve further with tighter harvest-to-delivery timing."
+- Operations Observation: Strong quality outcome and organic compliance; use as a reference profile for supplier coaching.
+
+3) Lot: LOT-0001925
+- Farmer ID: 1831
+- Farmer Name: Bao Tan Bui
+- District: Vinh Long
+- Certification: Certified Organic
+- Intake Date: 2026-06-16
+- Collection Point: Binh Minh Hub
+- Weight (kg): 137.8
+- Brix: 5.25
+- Grade: B
+- Organic Lot: True
+- Positive Remark: "Selective harvesting protected lot condition and reduced visibly damaged coconuts."
+- Negative Remark: "Delivered volume was lower than target and sweetness was below preferred level."
+- Operations Observation: Low weight and low brix versus peers; track next deliveries for recovery trend.
+
+4) Lot: LOT-0003761
+- Farmer ID: 8997
+- Farmer Name: Hai Nguyen
+- District: Ben Tre
+- Certification: Non-Organic
+- Intake Date: 2026-06-11
+- Collection Point: Ba Tri Hub
+- Weight (kg): 220.5
+- Brix: 6.79
+- Grade: B
+- Organic Lot: False
+- Positive Remark: "Field yield was steady and the lot reached acceptable sweetness for processing."
+- Negative Remark: "Grade remained at B, indicating room to improve sorting and maturity selection."
+- Operations Observation: Balanced volume and mid-level brix; candidate for quality uplift actions.
+
+5) Lot: LOT-0003873
+- Farmer ID: 25805
+- Farmer Name: Ba Bao Le
+- District: Ben Tre
+- Certification: Certified Organic
+- Intake Date: 2026-06-11
+- Collection Point: Binh Dai Hub
+- Weight (kg): 373.9
+- Brix: 5.68
+- Grade: B
+- Organic Lot: True
+- Positive Remark: "Delivered a high-volume lot with reliable organic documentation."
+- Negative Remark: "Sweetness was modest for the lot size, limiting quality upside despite strong volume."
+- Operations Observation: Highest volume among listed lots; prioritize brix improvement while preserving supply reliability.

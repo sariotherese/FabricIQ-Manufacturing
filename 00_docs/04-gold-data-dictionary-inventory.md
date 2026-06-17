@@ -43,8 +43,8 @@ reorder_point = avg_daily_demand × lead_time_days + safety_stock
 
 | # | Gold table (golddb) | Role | Grain | Primary key |
 |---|---|---|---|---|
-| 1 | `fact_inventory_snapshot_dim` | Fact | One row per snapshot date + product + warehouse | (`snapshot_date`, `product`, `warehouse`) |
-| 2 | `inventory_alert_dim` | Fact (view) | One row per alerting product + warehouse on the latest snapshot | (`snapshot_date`, `warehouse`, `product`) |
+| 1 | `fact_inventory_snapshot_dim` | Fact | One row per snapshot date + product + warehouse | `inventory_key` (surrogate; natural key = `snapshot_date` + `product` + `warehouse`) |
+| 2 | `inventory_alert_dim` | Fact (view) | One row per alerting product + warehouse on the latest snapshot | `inventory_key` (FK → `fact_inventory_snapshot_dim`) |
 
 > Source files: `01_data/raw/inventory_snapshots.csv` (full daily history) and `01_data/raw/inventory_alerts.csv` (latest-day restock alerts only).
 
@@ -52,12 +52,13 @@ reorder_point = avg_daily_demand × lead_time_days + safety_stock
 
 ## 1. `fact_inventory_snapshot_dim` — Daily Finished-Goods Inventory
 
-**Grain:** One row per (`snapshot_date`, `product`, `warehouse`).  **Key:** (`snapshot_date`, `product`, `warehouse`)
+**Grain:** One row per (`snapshot_date`, `product`, `warehouse`).  **Key:** `inventory_key` (surrogate)
 
 **Business context:** The daily stock position of every Cocoxim SKU at every distribution center — the running balance of what was on hand, what came in from production, and what shipped out. It is the single source for stock visibility, days-of-supply, reorder-point alerting, and restock recommendations.
 
 | Column | Type | Nullable | Description | Business context | Notes |
 |---|---|---|---|---|---|
+| `inventory_key` | String | No | Surrogate primary key for the stock position | The stable single-column identifier for one SKU-warehouse-day balance; lets the alert table reference a snapshot with one key. | SHA-256 of `snapshot_date`‖`warehouse`‖`product`. |
 | `snapshot_date` | Date | No | The day the stock position is measured | Puts every balance on a daily time axis for trend and as-of reporting. | FK → `date_dim.date`. |
 | `product` | String | No | Cocoxim SKU | The item being stocked and replenished. | FK → `product_dim.product`. |
 | `product_family` | String | No | Product category | Rolls SKUs up for category-level stock and service reporting. | e.g. `Coconut Water`, `Coconut Milk`. |
@@ -81,12 +82,13 @@ reorder_point = avg_daily_demand × lead_time_days + safety_stock
 
 ## 2. `inventory_alert_dim` — Restock Alert View
 
-**Grain:** One row per alerting (`product`, `warehouse`) on the latest snapshot.  **Key:** (`snapshot_date`, `warehouse`, `product`)
+**Grain:** One row per alerting (`product`, `warehouse`) on the latest snapshot.  **Key:** `inventory_key` (FK → `fact_inventory_snapshot_dim`)
 
 **Business context:** The manager's action list — the latest snapshot filtered to only SKUs at or below their reorder point, sorted by urgency. This is what gets surfaced as the "restock now" alert and feeds the replenishment decision.
 
 | Column | Type | Nullable | Description | Business context | Notes |
 |---|---|---|---|---|---|
+| `inventory_key` | String | No | Foreign key to the originating stock position | Ties each alert to its exact `fact_inventory_snapshot_dim` row with a single key. | SHA-256 of `snapshot_date`‖`warehouse`‖`product`; matches the snapshot. |
 | `snapshot_date` | Date | No | The day the alert was raised | Establishes the "as of" date of the alert inbox. | Latest snapshot with outstanding alerts. |
 | `warehouse` | String | No | Distribution center needing the restock | Directs the alert to the responsible site. | |
 | `product` | String | No | Cocoxim SKU at risk of stockout | Identifies exactly what to replenish. | FK → `product_dim.product`. |
