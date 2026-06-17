@@ -1,5 +1,6 @@
 table_name,column_name,description
 fact_inventory_snapshot_dim,,"The daily stock position of every Cocoxim SKU at every distribution center — the running balance of what was on hand, what came in from production, and what shipped out. It is the single source for stock visibility, days-of-supply, reorder-point alerting, and restock recommendations."
+fact_inventory_snapshot_dim,inventory_key,The stable single-column identifier for one SKU-warehouse-day balance; lets the alert table reference a snapshot with one key.
 fact_inventory_snapshot_dim,snapshot_date,Puts every balance on a daily time axis for trend and as-of reporting.
 fact_inventory_snapshot_dim,product,The item being stocked and replenished.
 fact_inventory_snapshot_dim,product_family,Rolls SKUs up for category-level stock and service reporting.
@@ -19,6 +20,7 @@ fact_inventory_snapshot_dim,stock_status,One-glance status for dashboards and tr
 fact_inventory_snapshot_dim,restock_alert,The flag that drives the manager alert.
 fact_inventory_snapshot_dim,recommended_order_units,Tells the manager how much to order to reach the target level.
 inventory_alert_dim,,"The manager's action list — the latest snapshot filtered to only SKUs at or below their reorder point, sorted by urgency. This is what gets surfaced as the restock now alert and feeds the replenishment decision."
+inventory_alert_dim,inventory_key,Ties each alert to its exact fact_inventory_snapshot_dim row with a single key.
 inventory_alert_dim,snapshot_date,"Establishes the ""as of"" date of the alert inbox."
 inventory_alert_dim,warehouse,Directs the alert to the responsible site.
 inventory_alert_dim,product,Identifies exactly what to replenish.
