@@ -1,6 +1,6 @@
 ## Business Case
 
-Betrimex (Cocoxim) needs a reliable, scalable data platform to improve
+Contoso Manufacturing Company (Comaco) needs a reliable, scalable data platform to improve
 quality control, increase processing yield, and deliver timely insights
 across its smallholder coconut supply chain in Ben Tre province.
 
@@ -35,4 +35,6 @@ cooperatives.
 Next steps: run the notebooks under `02_notebooks/` to populate sample
 tables, verify semantic model definitions, and iterate on agent prompts
 in `04_data_agents/`.
+
+
 

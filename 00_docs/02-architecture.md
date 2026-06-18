@@ -1,7 +1,7 @@
 # Architecture
 
 This document describes the end-to-end architecture for the Fabric IQ demo
-for Betrimex (Cocoxim), illustrating the OneLake medallion pattern feeding
+for Contoso Manufacturing Company (Comaco), illustrating the OneLake medallion pattern feeding
 into a certified semantic ontology and exposed via a bilingual Fabric Data
 Agent.
 
@@ -48,4 +48,6 @@ Pilot & Scaling Considerations
 References & Next Steps
 - Validate semantic terms in `03_semantic-model/` and agent prompts in `04_data_agents/`.
 - Run the notebooks in `02_notebooks/` to populate sample tables and verify the pipeline.
+
+
 

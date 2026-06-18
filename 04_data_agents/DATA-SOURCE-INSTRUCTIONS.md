@@ -1,4 +1,4 @@
-# Data Source Instructions — Betrimex Gold Star Schema
+# Data Source Instructions — Contoso Manufacturing Company Gold Star Schema
 
 **Schema:** `agri_lakehouse.golddb`
 
@@ -35,3 +35,4 @@
 - **Referential integrity:** Every fact row references valid dimension keys; use INNER JOINs by default
 - **Organic segregation:** Some runs/lots are organic-certified; check `is_organic` flags for compliance filtering
 - **Inventory:** `fact_inventory_snapshot_dim` is daily (one row per product per warehouse per day); `inventory_alert_dim` is a filtered view of latest day only
+

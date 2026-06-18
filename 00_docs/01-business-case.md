@@ -15,7 +15,7 @@ Sustainability reporting takes 3 weeks of manual Excel work each quarter
 Sales leaders rely on weekly static reports — no self-service insight
 
 # Use case
-A Fabric Data Agent that any Betrimex employee can chat with to answer questions like:
+A Fabric Data Agent that any Contoso Manufacturing Company employee can chat with to answer questions like:
 
 "Which farmers delivered Grade A coconuts above 95% last month, and what was the average brix?"
 "Show me yield loss on Line 2 yesterday and the top 3 root causes"

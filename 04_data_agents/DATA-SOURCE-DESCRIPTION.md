@@ -1,4 +1,4 @@
-# Betrimex Coconut Operations — Data Source
+# Contoso Manufacturing Company Coconut Operations — Data Source
 
 **Location:** `agri_lakehouse.golddb`  
 **Tables:** 13 (6 dimensions + 4 facts + 1 bridge + 2 inventory)  
@@ -6,7 +6,7 @@
 
 ## What This Is
 
-A star-schema data warehouse capturing Betrimex's entire coconut supply chain: from ~200 smallholder farmers in the Mekong Delta, through multi-line production facilities, quality testing, domestic and export sales, to daily finished-goods inventory across 3 distribution centers.
+A star-schema data warehouse capturing Contoso Manufacturing Company's entire coconut supply chain: from ~200 smallholder farmers in the Mekong Delta, through multi-line production facilities, quality testing, domestic and export sales, to daily finished-goods inventory across 3 distribution centers.
 
 ## What It Represents
 
@@ -25,3 +25,4 @@ Answer operational questions without waiting for static reports:
 - "Show me revenue by channel YTD" → Sales orders grouped by customer region/channel
 - "Trace an order back to its source farmers" → Bridge/lot/intake/farmer tables for full traceability
 - "Compare yields by plant/line/shift" → Production runs with efficiency bands and root-cause drivers
+

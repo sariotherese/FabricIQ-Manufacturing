@@ -1,11 +1,11 @@
-# Betrimex Fabric Demo — Gold Layer Data Dictionary
+# Contoso Manufacturing Company Fabric Demo — Gold Layer Data Dictionary
 
 **Version:** 1.0
 **Source layer:** Gold (star schema produced by `02_notebooks/03_gold_curate.ipynb`)
 **Lakehouse:** `agri_lakehouse`  **Schema:** `golddb`
 **Table naming:** `<entity>_dim` (the `_dim` suffix is the storage convention for every Gold Delta table — it does **not** imply the table is a dimension)
 **Owner:** Therese Sario, Microsoft Philippines
-**Customer:** Betrimex (Ben Tre Trading & Import-Export JSC) — Vietnamese coconut processor, brand Cocoxim
+**Customer:** Contoso Manufacturing Company (Ben Tre Trading & Import-Export JSC) — Vietnamese coconut processor, brand Comaco
 
 ---
 
@@ -59,7 +59,7 @@
 
 **Grain:** One row per farmer.  **Key:** `farmer_key` (= `farmer_id`)
 
-**Business context:** The master list of the smallholder coconut farmers who supply Betrimex across the Mekong Delta. It anchors supplier analytics and is the endpoint of every traceability query — answering "which farms did this product come from?" and "how much of our supply is organic-certified?"
+**Business context:** The master list of the smallholder coconut farmers who supply Contoso Manufacturing Company across the Mekong Delta. It anchors supplier analytics and is the endpoint of every traceability query — answering "which farms did this product come from?" and "how much of our supply is organic-certified?"
 
 | Column | Type | Nullable | Description | Business context | Notes |
 |---|---|---|---|---|---|
@@ -77,12 +77,12 @@
 
 **Grain:** One row per SKU.  **Key:** `product_key` (SHA-256 of `product`)
 
-**Business context:** The catalog of Cocoxim finished-goods SKUs. It lets the business slice production and sales by product and by product family, and distinguish organic from conventional lines.
+**Business context:** The catalog of Comaco finished-goods SKUs. It lets the business slice production and sales by product and by product family, and distinguish organic from conventional lines.
 
 | Column | Type | Nullable | Description | Business context | Notes |
 |---|---|---|---|---|---|
 | `product_key` | String | No | Surrogate key | Stable identifier linking a SKU to its production runs and sales orders. | SHA-256 hash of `product`. |
-| `product` | String | No | Cocoxim SKU name | The branded product as customers order it — the level at which pricing and demand are managed. | e.g. `Cocoxim Coconut Water Original 330ml`. |
+| `product` | String | No | Comaco SKU name | The branded product as customers order it — the level at which pricing and demand are managed. | e.g. `Comaco Coconut Water Original 330ml`. |
 | `product_family` | String | No | Derived product family | Rolls SKUs into categories for portfolio-level revenue and yield comparison. | One of `Coconut Water`, `Coconut Milk`, `Coconut Cream`, `Coconut Oil`, `Desiccated Coconut`, `Other`. |
 | `is_organic` | Boolean | No | Organic SKU flag | Separates the premium organic range from conventional for margin and compliance analysis. | From `is_organic_run`. |
 
@@ -107,7 +107,7 @@
 
 **Grain:** One row per customer + country + channel.  **Key:** `customer_key` (SHA-256 of `customer` + `country` + `channel`)
 
-**Business context:** Who Betrimex sells to — domestic distributors and international export buyers. It underpins market analysis: revenue by country, region, and channel, and the domestic-vs-export split that drives commercial strategy.
+**Business context:** Who Contoso Manufacturing Company sells to — domestic distributors and international export buyers. It underpins market analysis: revenue by country, region, and channel, and the domestic-vs-export split that drives commercial strategy.
 
 | Column | Type | Nullable | Description | Business context | Notes |
 |---|---|---|---|---|---|
@@ -145,7 +145,7 @@
 
 **Grain:** One row per QA test type.  **Key:** `test_type_key` (SHA-256 of `test_name`)
 
-**Business context:** The catalog of quality-assurance checks Betrimex runs and the specifications each must meet. It defines what "in-spec" means and lets quality results be grouped by test category for food-safety and compliance reporting.
+**Business context:** The catalog of quality-assurance checks Contoso Manufacturing Company runs and the specifications each must meet. It defines what "in-spec" means and lets quality results be grouped by test category for food-safety and compliance reporting.
 
 | Column | Type | Nullable | Description | Business context | Notes |
 |---|---|---|---|---|---|
@@ -170,7 +170,7 @@
 | `farmer_key` | Integer | No | FK → `farmer_dim.farmer_key` | Ties each delivery to the farm that supplied it. | |
 | `date_key` | Integer | No | FK → `date_dim.date_key` | Enables intake volume and quality trends over time (harvest seasons). | Derived from `intake_date`. |
 | `intake_date` | Date | No | Date the lot was received | When supply arrived — used for freshness and seasonality analysis. | |
-| `collection_point` | String | No | Betrimex hub of delivery | Identifies the receiving hub for logistics and regional intake reporting. | |
+| `collection_point` | String | No | Contoso Manufacturing Company hub of delivery | Identifies the receiving hub for logistics and regional intake reporting. | |
 | `district` | String | No | Province the lot came from | Geographic origin of supply for sourcing and risk analysis. | |
 | `weight_kg` | Float | No | Net weight of the lot | The core supply-volume measure (tonnes of coconut received). | Measure. |
 | `brix` | Float | No | Sugar content of coconut water | Key quality measure that drives downstream processing yield. | Measure / quality driver. |
@@ -281,4 +281,6 @@
 | `farmer_key` | Integer | No | FK → `farmer_dim.farmer_key` | Carries the source farm so traceability resolves in one hop. | Denormalized for fast traceability joins. |
 | `weight_consumed` | Float | No | Weight of the lot used in the run (kg) | How much of each lot fed the batch — supports mass-balance and contribution analysis. | Measure. |
 
-**Traceability:** join `fact_sales_order_dim` → `bridge_lot_run_dim` (on `run_id`) → `farmer_dim` (on `farmer_key`) to trace any Cocoxim order back to the supplying farmers — the backbone for EU/USDA organic certification audits.
+**Traceability:** join `fact_sales_order_dim` → `bridge_lot_run_dim` (on `run_id`) → `farmer_dim` (on `farmer_key`) to trace any Comaco order back to the supplying farmers — the backbone for EU/USDA organic certification audits.
+
+
