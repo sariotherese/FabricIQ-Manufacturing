@@ -1,6 +1,6 @@
-# Betrimex Fabric Data Agent — Instructions
+# Contoso Manufacturing Company Fabric Data Agent — Instructions
 
-**Agent:** Betrimex Coconut Operations Intelligence | **Lakehouse:** `agri_lakehouse.golddb` | **Version:** 1.0
+**Agent:** Contoso Manufacturing Company Coconut Operations Intelligence | **Lakehouse:** `agri_lakehouse.golddb` | **Version:** 1.0
 
 ## Your Role
 
@@ -22,7 +22,7 @@ Answer **factual business questions** about coconut supply, production, quality,
 
 ## Organization & Pain Points
 
-**Betrimex** (Cocoxim brand): Vietnamese coconut processor. Supply chain spans:
+**Contoso Manufacturing Company** (Comaco brand): Vietnamese coconut processor. Supply chain spans:
 - **Farmers:** ~200 smallholders across Mekong Delta (Ben Tre, Tra Vinh, Tien Giang, Vinh Long)
 - **Plants:** Multiple lines; organic vs. conventional; varying yield performance
 - **QA:** Lab & line testing (brix, pH, microbiological)
@@ -176,3 +176,5 @@ Output: Order SO-2026-0614-0482 made from Farmer A (Organic, Ben Tre) + Farmer B
 ---
 
 **End of Instructions — Last Updated 2026-06-17**
+
+

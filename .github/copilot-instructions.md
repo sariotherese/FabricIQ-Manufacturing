@@ -1,8 +1,8 @@
 # Repository Context for GitHub Copilot
 
 ## Project
-This repo contains a Microsoft Fabric demo for **Betrimex**, a Vietnamese
-coconut processor (Ben Tre province, brand: Cocoxim). The demo showcases:
+This repo contains a Microsoft Fabric demo for **Contoso Manufacturing Company**, a Vietnamese
+coconut processor (Ben Tre province, brand: Comaco). The demo showcases:
 - OneLake (unified storage, medallion architecture)
 - Fabric Ontology / Semantic Model (certified business definitions)
 - Fabric Data Agent (bilingual VN/EN natural-language Q&A)
@@ -30,4 +30,6 @@ coconut processor (Ben Tre province, brand: Cocoxim). The demo showcases:
 
 ## What NOT to suggest
 - Don't recommend installing new packages (Fabric notebooks have a fixed env)
-- Don't fabricate Betrimex internal data — use only the synthetic dataset
+- Don't fabricate Contoso Manufacturing Company internal data — use only the synthetic dataset
+
+
